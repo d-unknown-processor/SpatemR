@@ -50,8 +50,16 @@ for (i in 1:length(mediaAnni$data) ) {
 
 # Geokoordinaten der Bilder abrufen
 df = data.frame(no = 1:length(media$data))
+
 for (i in 1:length(media$data) ) {
-  df$name[i] <- media$data[[i]]$location$name
+  if ( is.null(media$data[[i]]$location$name) )
+  {
+    df$name[i] <- "Nicht benannt"
+  }
+  else
+  {
+    df$name[i] <- media$data[[i]]$location$name
+  }
   df$latitude[i] <- media$data[[i]]$location$latitude
   df$longitude[i] <- media$data[[i]]$location$longitude
   date <- as.POSIXct(as.numeric(media$data[[i]]$created_time), origin="1970-01-01")
@@ -91,7 +99,7 @@ df
 
 # Geografische Analyse der sozialen Orte Chronologie
 ## Erstellen einer Karte für den geografischen Raum Karlsruhe
-myMap <- get_map(location="Rastatt", source="stamen", zoom=8, maptype="watercolor", crop=FALSE) 
+myMap <- get_map(location = c(lat = 49.01345, lon = 8.39451), source="stamen", zoom=17, maptype="watercolor", crop=FALSE) 
 map <- ggmap(myMap, maprange=FALSE, extent = 'device', base_layer=ggplot(aes(x = longitude, y = latitude), data=df))
 # legend="topright" 
 plot  <- map + 
@@ -115,7 +123,7 @@ for (i in 1:nrow(df) ) {
   assign( paste0("g_",i,sep=""), rasterGrob(paste("pic_",i,sep=""), interpolate=T))
 }
 # Bilder hinzufügen
-margin <- 0.15
+margin <- 0.0005
 plot.pic <- plot
 for (i in 1:nrow(df)) {
   plot.pic <- plot.pic + inset(rasterGrob(get(paste("pic_",i,sep="")), interpolate=T), xmin=df$longitude[i]-margin, xmax=df$longitude[i]+margin, ymin=df$latitude[i]-margin,ymax=df$latitude[i]+margin)
